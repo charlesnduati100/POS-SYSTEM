@@ -1,12 +1,14 @@
-package com.example.possystem.ui.theme.screens.login
+package com.example.possystem.ui.theme.screens.register
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -29,10 +31,10 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.possystem.R
-import com.example.possystem.navigation.ROUTE_REGISTER
+import com.example.possystem.navigation.ROUTE_LOGIN
 import data.AuthViewModel
 
-// Anime color palette (Matching Register Screen)
+// Anime color palette
 private val AnimeDeepNavy = Color(0xFF0A0A1A)
 private val AnimeDarkPurple = Color(0xFF0F0F2E)
 private val AnimeDeepPurple = Color(0xFF1A0A2E)
@@ -41,15 +43,21 @@ private val AnimeMagenta = Color(0xFFCC22AA)
 private val AnimePurple = Color(0xFF7722CC)
 private val AnimeCyan = Color(0xFF44DDFF)
 private val AnimePink = Color(0xFFFF66BB)
+private val AnimeLightPurple = Color(0xFFCCAAFF)
+private val AnimeMutedPurple = Color(0xFF7744AA)
 private val AnimeFieldBg = Color(0x99200A50)
 private val AnimeFieldBgBlue = Color(0x990A1432)
 
 @Composable
-fun LoginScreen(navController: NavController) {
+fun RegisterScreen(navController: NavController) {
+    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
+    var phoneNumber by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var confirmpassword by remember { mutableStateOf("") }
     val authViewModel: AuthViewModel = viewModel()
     val context = LocalContext.current
+    val scrollState = rememberScrollState()
 
     Box(
         modifier = Modifier
@@ -64,10 +72,12 @@ fun LoginScreen(navController: NavController) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 28.dp),
+                .padding(horizontal = 28.dp)
+                .verticalScroll(scrollState),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
+            Spacer(modifier = Modifier.height(30.dp))
             // Avatar with glowing ring
             Box(contentAlignment = Alignment.Center) {
                 // Outer glow ring
@@ -84,10 +94,10 @@ fun LoginScreen(navController: NavController) {
                         .clip(CircleShape)
                         .border(2.dp, AnimePurple.copy(alpha = 0.6f), CircleShape)
                 )
-                // Login image
+                // Avatar image
                 Image(
                     painter = painterResource(id = R.drawable.logo),
-                    contentDescription = "login",
+                    contentDescription = "logo",
                     modifier = Modifier
                         .size(88.dp)
                         .clip(CircleShape)
@@ -97,17 +107,16 @@ fun LoginScreen(navController: NavController) {
 
             Spacer(modifier = Modifier.height(4.dp))
 
-            // Subtitle
+            // Japanese subtitle
             Text(
-                text = "WELCOME BACK",
+                text = "WELCOME",
                 fontSize = 11.sp,
                 letterSpacing = 3.sp,
                 color = AnimeCyan,
             )
 
-            // Gradient title
             Text(
-                text = "Login Here",
+                text = "Register Here",
                 fontSize = 28.sp,
                 fontWeight = FontWeight.Bold,
                 style = TextStyle(
@@ -118,13 +127,27 @@ fun LoginScreen(navController: NavController) {
             )
 
             Text(
-                text = "Sign in to your account",
+                text = "Create an account to continue",
                 fontSize = 11.sp,
                 color = Color(0xFF44DDFF),
                 letterSpacing = 1.sp
             )
 
             Spacer(modifier = Modifier.height(24.dp))
+
+            // Username field
+            AnimeTextField(
+                value = username,
+                onValueChange = { username = it },
+                label = "Username",
+                placeholder = "Enter Username",
+                icon = Icons.Default.Person,
+                iconTint = Color(0xFF44DDFF),
+                fieldBackground = AnimeFieldBg,
+                borderColor = Color(0xFF4422AA)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Email field
             AnimeTextField(
@@ -133,6 +156,20 @@ fun LoginScreen(navController: NavController) {
                 label = "Email",
                 placeholder = "Enter Email",
                 icon = Icons.Default.Email,
+                iconTint = Color(0xFF44DDFF),
+                fieldBackground = AnimeFieldBg,
+                borderColor = Color(0xFF4422AA)
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Phone field
+            AnimeTextField(
+                value = phoneNumber,
+                onValueChange = { phoneNumber = it },
+                label = "Phone Number",
+                placeholder = "Enter Phone Number",
+                icon = Icons.Default.Phone,
                 iconTint = Color(0xFF44DDFF),
                 fieldBackground = AnimeFieldBg,
                 borderColor = Color(0xFF4422AA)
@@ -153,31 +190,44 @@ fun LoginScreen(navController: NavController) {
                 isPassword = true
             )
 
+            Spacer(modifier = Modifier.height(12.dp))
+
+            // Confirm Password field
+            AnimeTextField(
+                value = confirmpassword,
+                onValueChange = { confirmpassword = it },
+                label = "Confirm Password",
+                placeholder = "Confirm Password",
+                icon = Icons.Default.Check,
+                iconTint = Color(0xFF44FFCC),
+                fieldBackground = AnimeFieldBgBlue,
+                borderColor = Color(0xFF224488),
+                isPassword = true
+            )
+
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Login button with gradient
-            Box(
+            Button(
+                onClick = {
+                    authViewModel.signup(
+                        username = username,
+                        email = email,
+                        password = password,
+                        confirmpassword = confirmpassword,
+                        phoneNumber = phoneNumber,
+                        navController = navController,
+                        context = context
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        brush = Brush.linearGradient(
-                            colors = listOf(AnimePurple, AnimeMagenta)
-                        )
-                    )
-                    .clickable {
-                        authViewModel.login(
-                            email = email,
-                            password = password,
-                            navController = navController,
-                            context = context
-                        )
-                    }
-                    .padding(vertical = 14.dp),
-                contentAlignment = Alignment.Center
+                    .height(50.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = AnimePurple,
+                )
             ) {
                 Text(
-                    text = "Login",
+                    text = "Register",
                     color = Color.White,
                     fontWeight = FontWeight.Medium,
                     fontSize = 16.sp,
@@ -188,17 +238,18 @@ fun LoginScreen(navController: NavController) {
             Spacer(modifier = Modifier.height(16.dp))
 
             Text(
-                text = "Don't have an account?",
+                text = "Already registered?",
                 color = AnimeCyan,
                 fontSize = 16.sp
             )
             Text(
-                text = "→ Register here ←",
+                text = "→ Login here ←",
                 color = AnimePink,
                 fontSize = 16.sp,
                 textDecoration = TextDecoration.Underline,
-                modifier = Modifier.clickable { navController.navigate(ROUTE_REGISTER) }
+                modifier = Modifier.clickable { navController.navigate(ROUTE_LOGIN) }
             )
+            Spacer(modifier = Modifier.height(30.dp))
         }
     }
 }
@@ -244,6 +295,6 @@ private fun AnimeTextField(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-fun LoginScreenPreview() {
-    LoginScreen(rememberNavController())
+fun RegisterScreenPreview() {
+    RegisterScreen(rememberNavController())
 }
